@@ -1,0 +1,157 @@
+﻿<Window x:Class="小说阅读器.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:小说阅读器"
+        Name="Window" Width="800" Height="500" WindowStartupLocation="CenterScreen" Title="{Binding CurrentTitle, Mode=OneWay}" Closing="Window_Closing" KeyUp="Fuck_KeyUp" Loaded="Window_Loaded" >
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="{x:Type Label}" TargetType="{x:Type Label}">
+            <Setter Property="Control.Foreground" Value="{Binding LabelColor}" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <TabControl>
+            <TabItem Name="MainTab" Header="阅读" >
+                <Grid Name="MainGrid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Name="Nav" Grid.Row="0" Grid.ColumnSpan="3" Focusable="False">
+                        <StackPanel HorizontalAlignment="Left" Height="40" Margin="10,0,0,0" VerticalAlignment="Center" Orientation="Horizontal">
+                            <Button Name="OpenFile" Content="打开文件" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="Button_Click" />
+                            <Button Name="PreChapter" Content="上一章" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" IsEnabled="{Binding CanPreChapter, Mode=OneWay}" Click="Button_Click_1" />
+                            <Button Name="NextChapter" Content="下一章" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" IsEnabled="{Binding CanNextChapter, Mode=OneWay}" Click="Button_Click_2" />
+                            <Button Name="ChapterList" Content="目录" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" IsEnabled="{Binding CanOpenCatalog, Mode=OneWay}" Click="ChapterList_Click" />
+                            <Button Name="AddBookMark" Content="添加书签" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="AddBookMark_Click"  />
+                            <Button Name="AutoBtn" Content="自动滚动" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" MinWidth="72" Click="AutoBtn_Click" />
+                            <Button Name="ToNightMode" Content="夜间模式" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="ToNightMode_Click" />
+                            <Button Name="Setting" Content="设置" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="Setting_Click" />
+                            <ProgressBar Name="Schedule" Width="72" Margin="10,0,0,0" VerticalAlignment="Center" SmallChange="1" Foreground="#FF647DF0" Height="8" Maximum="{Binding ChaptersCount, Mode=OneWay}" Value="{Binding CurrentChapter, Mode=OneWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Name="CatalogGrid" Grid.Column="0" Grid.Row="1" Visibility="Collapsed">
+                        <ListView Name="Catalog" Margin="10,0,0,10" MaxWidth="256" >
+                            <ListView.Resources>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Foreground" Value="#E74C3C"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Resources>
+                        </ListView>
+                    </Grid>
+                    <Grid Name="ReadingArea" Grid.Column="1" Grid.Row="1" SizeChanged="ReadingArea_SizeChanged">
+                        <RichTextBox Name="Fuck" Margin="10,0,10,10" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto" IsUndoEnabled="False" UndoLimit="0" MouseDoubleClick="Fuck_MouseDoubleClick" PreviewDragOver="Fuck_PreviewDragOver" PreviewDrop="Fuck_PreviewDrop">
+                            <RichTextBox.Resources>
+                                <Style x:Key="{x:Type Paragraph}" TargetType="{x:Type Paragraph}">
+                                    <Setter Property="Block.Margin" Value="{Binding ParaMargin, Mode=OneWay}" />
+                                    <Setter Property="Block.LineHeight" Value="{Binding LineHeight, Mode=OneWay}" />
+                                </Style>
+                            </RichTextBox.Resources>
+                            <FlowDocument Name="NovelContent" FontFamily="{Binding FontName, Mode=OneWay}" FontSize="{Binding FontSize, Mode=OneWay}" Background="{Binding BackgroundColor, Mode=OneWay}" FontStyle="{Binding IsItalic}" FontWeight="{Binding IsBold}" Foreground="{Binding FontBrush}" />
+                        </RichTextBox>
+                    </Grid>
+                    <Grid Name="SettingGrid" Grid.Column="2" Grid.Row="1" Visibility="Collapsed">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Button Name="SetFont" Content="字体设置" HorizontalAlignment="Center" Margin="10,5" VerticalAlignment="Center" Width="75" Click="SetFont_Click" />
+                                <Button Name="SetBackgroud" Content="背景设置" HorizontalAlignment="Center" Margin="10,5" VerticalAlignment="Center" Width="75" Click="SetBackgroud_Click" />
+                            </WrapPanel>
+                            <Label Content="阅读设置————" Height="22" Margin="10,0" Width="100" HorizontalAlignment="Left" FontSize="10" Foreground="#FF2F2F2F" />
+                            <WrapPanel>
+                                <Label Content="最大显示宽度" Height="25" Margin="10,3" Width="100" />
+                                <TextBox Name="MaxDisplayWidthSet" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding MaxDisplayWidth, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Label Content="行高" Height="25" Margin="10,5" Width="100" />
+                                <TextBox Name="LineHeightSet" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding LineHeight, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Label Content="段落间距" Height="25" Margin="10,5" Width="100" />
+                                <TextBox Name="ParaGapSet" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding ParaGap, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Label Content="分章" Height="25" Margin="10,5" Width="75" />
+                                <CheckBox Name="DivideChapter" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding ChapterDivide, Mode=OneWay}" />
+                                <Label Content="分段" Height="25" Margin="10,5" Width="75" />
+                                <CheckBox Name="CutOff" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding LongDivide, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=DivideChapter}">
+                                <Label Content="分章正则" Margin="10,5" Width="100" />
+                                <TextBox Name="Principle" HorizontalAlignment="Left" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding Rg, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=CutOff}">
+                                <Label Content="最大段字数" Height="25" Margin="10,5" Width="100" />
+                                <TextBox Name="LimitNumber" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding DivideLimit, Mode=OneWay}" />
+                            </WrapPanel>
+                            <Label Content="滚屏设置————" Height="22" Margin="10,0" Width="100" HorizontalAlignment="Left" FontSize="10" Foreground="#FF2F2F2F" />
+                            <WrapPanel>
+                                <Label Content="章节前停留时间" Height="25" Margin="10,0,10,5" Width="100" />
+                                <TextBox Name="Before" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding WaitBefore, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Label Content="滚屏间隔" Height="25" Margin="10,5" Width="100" />
+                                <TextBox Name="Gap" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding Interval, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Label Content="章节后停留时间" Height="25" Margin="10,5" Width="100" />
+                                <TextBox Name="After" HorizontalAlignment="Left" Height="25" Margin="10,3" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" UndoLimit="0" Text="{Binding WaitAfter, Mode=OneWay}" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Button Name="Yes" Content="确定" HorizontalAlignment="Center" Margin="10,5" VerticalAlignment="Center" Width="75" Click="Yes_Click" />
+                                <Button Name="Cancel" Content="取消" HorizontalAlignment="Center" Margin="10,5" VerticalAlignment="Center" Width="75" Click="Cancel_Click" />
+                                <Button Name="Default" Content="恢复默认" HorizontalAlignment="Center" Margin="10,5" VerticalAlignment="Center" Width="75" Click="Default_Click" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="书库/书签" Name="ListOfSth">
+                <Grid Name="OtherGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="7*" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="8*" />
+                    </Grid.RowDefinitions>
+                    <ListView Name="Shelf" DockPanel.Dock="Top" Margin="10" Grid.Row="0" >
+                    </ListView>
+                    <WrapPanel Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                        <Button Name="OpenShelf" Content="打开书库" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="OpenShelf_Click" />
+                        <Button Name="Remove" Content="清除选中" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="Remove_Click" />
+                        <Button Name="RemoveAll" Content="清除所有" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Click="RemoveAll_Click" />
+                        <Label Content="←书库设置" Height="25" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Width="72" Foreground="Gray" />
+                    </WrapPanel>
+                    <WrapPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Label Content="书签设置→" Height="25" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="Gray" />
+                        <Button Name="HisRemove" Content="清除选中" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" Width="72" Click="HisRemove_Click" />
+                        <Button Name="HisRemoveAll" Content="清除所有" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" Width="72" Click="HisRemoveAll_Click" />
+                    </WrapPanel>
+                    <ListView Name="BookMark" DockPanel.Dock="Bottom" Margin="10" Grid.Row="2">
+                        <ListView.View>
+                            <GridView x:Name="GridView">
+                                <GridViewColumn Header="书路径" DisplayMemberBinding="{Binding BookPath}"/>
+                                <GridViewColumn Header="当前章数" DisplayMemberBinding="{Binding CurrentChapter}"/>
+                                <GridViewColumn Header="保存时间" DisplayMemberBinding="{Binding SaveDate}"/>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <EventSetter Event="MouseDoubleClick" Handler="bookMark_MouseDoubleClick"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
